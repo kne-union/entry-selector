@@ -1,0 +1,24 @@
+{
+  "isFull": false,
+  "list": [
+    {
+      "title": "这里填写示例标题",
+      "description": "这里填写示例说明",
+      "code": "./base.js",
+      "scope": [
+        {
+          "name": "_EntrySelector",
+          "packageName": "@kne/current-lib_entry-selector",
+          "importStatement": "import * as _EntrySelector from \"@kne/entry-selector\""
+        },
+        {
+          "packageName": "@kne/current-lib_entry-selector/dist/index.css"
+        },
+        {
+          "name": "antd",
+          "packageName": "antd"
+        }
+      ]
+    }
+  ]
+}
