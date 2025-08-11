@@ -160,7 +160,6 @@ const EntrySelector = createWithIntlProvider({
         }}
       >
         {({ fetchApi, list }) => {
-          const targetOptions = typeof renderOptions === 'function' ? renderOptions({ fetchApi, options }) : options;
           return (
             <List
               className={classnames(style['list'], style['list-lib'])}
@@ -168,6 +167,13 @@ const EntrySelector = createWithIntlProvider({
               dataSource={list}
               renderItem={item => {
                 const defaultItem = <span className={'list-item-title'}>{item.title}</span>;
+                const targetOptions =
+                  typeof renderOptions === 'function'
+                    ? renderOptions(item, {
+                        fetchApi,
+                        options
+                      })
+                    : options;
                 return (
                   <List.Item
                     key={item.id}
