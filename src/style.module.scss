@@ -18,7 +18,7 @@
 }
 
 .list-scroll {
-  max-height: 800px;
+  max-height: var(--max-scroller-height, 800px);
 }
 
 .list {

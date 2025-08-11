@@ -22,13 +22,20 @@ const EntrySelector = createWithIntlProvider({
     'en-US': enUS
   },
   namespace: 'entry-selector'
-})(({ onAdd, api, options, renderSelectedItem, renderItem, renderOptions, getSearchProps, searchPlaceholder, ...props }) => {
+})(({ onAdd, api, options, renderSelectedItem, renderItem, renderOptions, getSearchProps, searchPlaceholder, maxScrollerHeight = 800, ...props }) => {
   const [value, onChange] = useControllerValue(props);
   const [searchProps, setSearchProps] = useState({});
   const { formatMessage } = useIntl();
   const ref = useRef(null);
   return (
-    <Flex vertical gap={8} className={style['entry-selector']}>
+    <Flex
+      vertical
+      gap={8}
+      className={style['entry-selector']}
+      style={{
+        '--max-scroller-height': `${maxScrollerHeight}px`
+      }}
+    >
       {typeof onAdd === 'function' && (
         <Flex>
           <Button
