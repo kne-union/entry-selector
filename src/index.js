@@ -73,7 +73,7 @@ const EntrySelector = createWithIntlProvider({
           const currentList = (value || []).map(({ id }) => listMapping.get(id)).filter(item => !!item);
           return (
             <Row gutter={[12, 12]}>
-              <Col span={totalCount > 0 ? 12 : 24}>
+              <Col span={12}>
                 <div className={style['list-outer']}>
                   {totalCount > 0 && <div className={style['list-header']}>{formatMessage({ id: 'selected' })}</div>}
                   <SimpleBar className={style['list-scroll']} autoHide={false}>
@@ -140,28 +140,26 @@ const EntrySelector = createWithIntlProvider({
                   </SimpleBar>
                 </div>
               </Col>
-              {totalCount > 0 && (
-                <Col span={12}>
-                  <div className={style['list-outer']}>
-                    <Flex className={style['list-header']} justify="space-between">
-                      <div className={style['list-header-title']}>{formatMessage({ id: 'list' })}</div>
-                      <div>
-                        {typeof getSearchProps === 'function' && (
-                          <SearchInput
-                            size="small"
-                            placeholder={searchPlaceholder || formatMessage({ id: 'searchPlaceholder' })}
-                            value={searchProps.searchText}
-                            onSearch={value => {
-                              setSearchProps(searchProps => Object.assign({}, searchProps, { searchText: value }));
-                            }}
-                          />
-                        )}
-                      </div>
-                    </Flex>
-                    {children}
-                  </div>
-                </Col>
-              )}
+              <Col span={12}>
+                <div className={style['list-outer']}>
+                  <Flex className={style['list-header']} justify="space-between">
+                    <div className={style['list-header-title']}>{formatMessage({ id: 'list' })}</div>
+                    <div>
+                      {typeof getSearchProps === 'function' && (
+                        <SearchInput
+                          size="small"
+                          placeholder={searchPlaceholder || formatMessage({ id: 'searchPlaceholder' })}
+                          value={searchProps.searchText}
+                          onSearch={value => {
+                            setSearchProps(searchProps => Object.assign({}, searchProps, { searchText: value }));
+                          }}
+                        />
+                      )}
+                    </div>
+                  </Flex>
+                  {children}
+                </div>
+              </Col>
             </Row>
           );
         }}
