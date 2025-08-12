@@ -203,7 +203,7 @@ const EntrySelector = createWithIntlProvider({
                         if (index > -1) {
                           newValue.splice(index, 1);
                         } else {
-                          newValue.push({ id: item.id });
+                          newValue.push(Object.assign({}, item));
                         }
 
                         return newValue;
