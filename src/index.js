@@ -74,7 +74,7 @@ const EntrySelector = createWithIntlProvider({
             selectedMappingRef.current.set(item.id, item);
           });
           const listMapping = selectedMappingRef.current;
-          const currentList = (value || []).map(({ id }) => listMapping.get(id)).filter(item => !!item);
+          const currentList = (value || []).map(item => Object.assign({}, listMapping.get(item.id) || item));
           return (
             <Row gutter={[12, 12]}>
               <Col span={12}>
@@ -101,41 +101,38 @@ const EntrySelector = createWithIntlProvider({
                             });
                           }}
                         >
-                          {(value || [])
-                            .map(({ id }) => listMapping.get(id))
-                            .filter(item => !!item)
-                            .map((item, index) => {
-                              const defaultItem = <span className={'list-item-title'}>{item.title}</span>;
-                              const mapping = new Map((value || []).map(item => [item.id, item]));
-                              return (
-                                <List.Item key={item.id} className={classnames(style['columns-control-content-item'], style['is-drag'])}>
-                                  <HolderOutlined className={style['columns-control-content-item-icon']} />
-                                  <div className={style['list-index']}>{index + 1}</div>
-                                  <Flex vertical flex={1}>
-                                    {typeof renderSelectedItem === 'function'
-                                      ? renderSelectedItem(mapping.get(item.id), {
-                                          el: defaultItem,
-                                          target: item,
-                                          fetchApi,
-                                          searchProps,
-                                          setSearchProps,
-                                          onChange: item => {
-                                            return onChange(value => {
-                                              const newValue = (value || []).slice(0);
-                                              const index = newValue.findIndex(({ id }) => id === item.id);
-                                              const currentItem = newValue[index];
-                                              if (index > -1) {
-                                                newValue.splice(index, 1, Object.assign({}, typeof item === 'function' ? item(currentItem) : item));
-                                              }
-                                              return newValue;
-                                            });
-                                          }
-                                        })
-                                      : defaultItem}
-                                  </Flex>
-                                </List.Item>
-                              );
-                            })}
+                          {currentList.map((item, index) => {
+                            const defaultItem = <span className={'list-item-title'}>{item.title}</span>;
+                            const mapping = new Map((value || []).map(item => [item.id, item]));
+                            return (
+                              <List.Item key={item.id} className={classnames(style['columns-control-content-item'], style['is-drag'])}>
+                                <HolderOutlined className={style['columns-control-content-item-icon']} />
+                                <div className={style['list-index']}>{index + 1}</div>
+                                <Flex vertical flex={1}>
+                                  {typeof renderSelectedItem === 'function'
+                                    ? renderSelectedItem(mapping.get(item.id), {
+                                        el: defaultItem,
+                                        target: item,
+                                        fetchApi,
+                                        searchProps,
+                                        setSearchProps,
+                                        onChange: item => {
+                                          return onChange(value => {
+                                            const newValue = (value || []).slice(0);
+                                            const index = newValue.findIndex(({ id }) => id === item.id);
+                                            const currentItem = newValue[index];
+                                            if (index > -1) {
+                                              newValue.splice(index, 1, Object.assign({}, typeof item === 'function' ? item(currentItem) : item));
+                                            }
+                                            return newValue;
+                                          });
+                                        }
+                                      })
+                                    : defaultItem}
+                                </Flex>
+                              </List.Item>
+                            );
+                          })}
                         </ReactSortable>
                       </List>
                     ) : (

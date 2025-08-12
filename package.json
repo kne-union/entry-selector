@@ -1,6 +1,6 @@
 {
   "name": "@kne/entry-selector",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "EntrySelector是一个用于选择和管理条目列表的 React 组件。它提供了一个直观的界面，允许用户从可选列表中选择条目，并对已选条目进行管理，包括排序、搜索和删除等操作。",
   "syntax": {
     "esmodules": true
