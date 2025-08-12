@@ -22,11 +22,12 @@ const EntrySelector = createWithIntlProvider({
     'en-US': enUS
   },
   namespace: 'entry-selector'
-})(({ onAdd, api, options, renderSelectedItem, renderItem, renderOptions, getSearchProps, searchPlaceholder, maxScrollerHeight = 800, ...props }) => {
+})(({ onAdd, api, options, selectedTitle, listTitle, renderListTitle, renderSelectedItem, renderItem, renderOptions, getSearchProps, searchPlaceholder, maxScrollerHeight = 800, ...props }) => {
   const [value, onChange] = useControllerValue(props);
   const [searchProps, setSearchProps] = useState({});
   const { formatMessage } = useIntl();
   const ref = useRef(null);
+  const selectedMappingRef = useRef(new Map());
   return (
     <Flex
       vertical
@@ -69,13 +70,16 @@ const EntrySelector = createWithIntlProvider({
             },
             data
           );
-          const listMapping = new Map(pageData.map(item => [item.id, item]));
+          pageData.forEach(item => {
+            selectedMappingRef.current.set(item.id, item);
+          });
+          const listMapping = selectedMappingRef.current;
           const currentList = (value || []).map(({ id }) => listMapping.get(id)).filter(item => !!item);
           return (
             <Row gutter={[12, 12]}>
               <Col span={12}>
                 <div className={style['list-outer']}>
-                  {totalCount > 0 && <div className={style['list-header']}>{formatMessage({ id: 'selected' })}</div>}
+                  {totalCount > 0 && <div className={style['list-header']}>{selectedTitle || formatMessage({ id: 'selected' })}</div>}
                   <SimpleBar className={style['list-scroll']} autoHide={false}>
                     {value && value.length > 0 ? (
                       <List className={style['list']} size="small">
@@ -113,6 +117,8 @@ const EntrySelector = createWithIntlProvider({
                                           el: defaultItem,
                                           target: item,
                                           fetchApi,
+                                          searchProps,
+                                          setSearchProps,
                                           onChange: item => {
                                             return onChange(value => {
                                               const newValue = (value || []).slice(0);
@@ -143,7 +149,16 @@ const EntrySelector = createWithIntlProvider({
               <Col span={12}>
                 <div className={style['list-outer']}>
                   <Flex className={style['list-header']} justify="space-between">
-                    <div className={style['list-header-title']}>{formatMessage({ id: 'list' })}</div>
+                    <div className={style['list-header-title']}>
+                      {listTitle ||
+                        (typeof renderListTitle === 'function' &&
+                          renderListTitle({
+                            fetchApi,
+                            searchProps,
+                            setSearchProps
+                          })) ||
+                        formatMessage({ id: 'list' })}
+                    </div>
                     <div>
                       {typeof getSearchProps === 'function' && (
                         <SearchInput
@@ -175,6 +190,8 @@ const EntrySelector = createWithIntlProvider({
                 const targetOptions =
                   typeof renderOptions === 'function'
                     ? renderOptions(item, {
+                        searchProps,
+                        setSearchProps,
                         fetchApi,
                         options
                       })
@@ -201,7 +218,9 @@ const EntrySelector = createWithIntlProvider({
                       {typeof renderItem === 'function'
                         ? renderItem(item, {
                             fetchApi,
-                            el: defaultItem
+                            el: defaultItem,
+                            searchProps,
+                            setSearchProps
                           })
                         : defaultItem}
                     </Flex>
