@@ -24,7 +24,7 @@ const BaseExample = () => {
                   id: 3,
                   title: '请分享一次你快速作出决定的经验，当时的情况怎样？你是怎么处理的？'
                 }
-              ]
+              ].filter(({ title }) => !(data?.params?.title && title.indexOf(data.params.title) === -1))
             };
           }
         }}
