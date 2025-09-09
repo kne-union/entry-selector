@@ -116,13 +116,13 @@ const EntrySelector = createWithIntlProvider({
                                         fetchApi,
                                         searchProps,
                                         setSearchProps,
-                                        onChange: item => {
+                                        onChange: targetItem => {
                                           return onChange(value => {
                                             const newValue = (value || []).slice(0);
                                             const index = newValue.findIndex(({ id }) => id === item.id);
                                             const currentItem = newValue[index];
                                             if (index > -1) {
-                                              newValue.splice(index, 1, Object.assign({}, typeof item === 'function' ? item(currentItem) : item));
+                                              newValue.splice(index, 1, Object.assign({}, typeof targetItem === 'function' ? targetItem(currentItem) : targetItem));
                                             }
                                             return newValue;
                                           });
