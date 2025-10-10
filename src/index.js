@@ -98,7 +98,8 @@ const EntrySelector = createWithIntlProvider({
                     {value && value.length > 0 ? (
                       <List className={style['list']} size="small">
                         <ReactSortable
-                          filter=".ignore-elements"
+                          filter=".sortable-ignore-elements"
+                          handle=".sortable-drag-handle"
                           dragClass={style['sortable-drag']}
                           ghostClass={style['sortable-ghost']}
                           forceFallback
@@ -131,7 +132,7 @@ const EntrySelector = createWithIntlProvider({
                             const mapping = new Map((value || []).map(item => [item.id, item]));
                             return (
                               <List.Item key={item.id} className={classnames(style['columns-control-content-item'], style['is-drag'])}>
-                                <HolderOutlined className={style['columns-control-content-item-icon']} />
+                                <HolderOutlined className={classnames('sortable-drag-handle', style['columns-control-content-item-icon'])} />
                                 <div className={style['list-index']}>{index + 1}</div>
                                 <Flex justify="space-between" gap={8} flex={1} className={style['list-item-content']}>
                                   <Flex vertical flex={1}>

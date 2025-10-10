@@ -98,9 +98,12 @@
   }
 
   &.is-drag {
-    cursor: move !important;
-
     :global {
+      .sortable-drag-handle {
+        cursor: move !important;
+        padding: 12px 2px;
+      }
+
       .ant-checkbox-wrapper {
         margin-left: 2px;
       }
