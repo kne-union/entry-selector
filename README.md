@@ -95,7 +95,7 @@ const BaseExample = () => {
         getSearchProps={({ searchText }) => {
           return { title: searchText };
         }}
-        renderSelectedItem={(item, { el, onChange }) => {
+        renderSelectedItem={(item, { el, onReplace }) => {
           return (
             <>
               {el}
@@ -105,7 +105,7 @@ const BaseExample = () => {
                   size="small"
                   checked={item.hasProbe}
                   onChange={checked => {
-                    onChange(Object.assign({}, item, { hasProbe: checked }));
+                    onReplace(Object.assign({}, item, { hasProbe: checked }));
                   }}
                 />
               </Flex>

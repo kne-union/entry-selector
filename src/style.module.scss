@@ -69,6 +69,19 @@
   justify-content: center;
 }
 
+.list-item-content {
+  :global(.list-item-remove-btn) {
+    opacity: 0;
+    flex: none;
+  }
+
+  &:hover {
+    :global(.list-item-remove-btn) {
+      opacity: 1;
+    }
+  }
+}
+
 .columns-control-content-list {
   padding: 0;
 }
