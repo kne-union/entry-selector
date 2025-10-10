@@ -3,8 +3,8 @@ import zhCn from './locale/zh-CN';
 import enUS from './locale/en-US';
 import { ReactSortable } from 'react-sortablejs';
 import { createWithIntlProvider, useIntl } from '@kne/react-intl';
-import { MoreOutlined, HolderOutlined } from '@ant-design/icons';
-import ButtonGroup from '@kne/button-group';
+import { MoreOutlined, HolderOutlined, DeleteOutlined } from '@ant-design/icons';
+import ButtonGroup, { ConfirmButton } from '@kne/button-group';
 import useControllerValue from '@kne/use-control-value';
 import { FetchScrollLoader } from '@kne/scroll-loader';
 import classnames from 'classnames';
@@ -28,6 +28,20 @@ const EntrySelector = createWithIntlProvider({
   const { formatMessage } = useIntl();
   const ref = useRef(null);
   const selectedMappingRef = useRef(new Map());
+  const onSelected = item => {
+    return onChange(value => {
+      const newValue = (value || []).slice(0);
+      const index = newValue.findIndex(({ id }) => id === item.id);
+      if (index > -1) {
+        newValue.splice(index, 1);
+      } else {
+        newValue.push(Object.assign({}, item));
+      }
+
+      return newValue;
+    });
+  };
+
   return (
     <Flex
       vertical
@@ -103,32 +117,49 @@ const EntrySelector = createWithIntlProvider({
                         >
                           {currentList.map((item, index) => {
                             const defaultItem = <span className={'list-item-title'}>{item.title}</span>;
+                            const removeOption = (
+                              <ConfirmButton
+                                color="danger"
+                                variant="filled"
+                                className={'list-item-remove-btn'}
+                                icon={<DeleteOutlined />}
+                                onClick={() => {
+                                  onSelected(item);
+                                }}
+                              />
+                            );
                             const mapping = new Map((value || []).map(item => [item.id, item]));
                             return (
                               <List.Item key={item.id} className={classnames(style['columns-control-content-item'], style['is-drag'])}>
                                 <HolderOutlined className={style['columns-control-content-item-icon']} />
                                 <div className={style['list-index']}>{index + 1}</div>
-                                <Flex vertical flex={1}>
-                                  {typeof renderSelectedItem === 'function'
-                                    ? renderSelectedItem(mapping.get(item.id), {
-                                        el: defaultItem,
-                                        target: item,
-                                        fetchApi,
-                                        searchProps,
-                                        setSearchProps,
-                                        onChange: targetItem => {
-                                          return onChange(value => {
-                                            const newValue = (value || []).slice(0);
-                                            const index = newValue.findIndex(({ id }) => id === item.id);
-                                            const currentItem = newValue[index];
-                                            if (index > -1) {
-                                              newValue.splice(index, 1, Object.assign({}, typeof targetItem === 'function' ? targetItem(currentItem) : targetItem));
-                                            }
-                                            return newValue;
-                                          });
-                                        }
-                                      })
-                                    : defaultItem}
+                                <Flex justify="space-between" gap={8} flex={1} className={style['list-item-content']}>
+                                  <Flex vertical flex={1}>
+                                    {typeof renderSelectedItem === 'function'
+                                      ? renderSelectedItem(mapping.get(item.id), {
+                                          el: defaultItem,
+                                          removeOptionEl: removeOption,
+                                          target: item,
+                                          fetchApi,
+                                          searchProps,
+                                          setSearchProps,
+                                          onChange,
+                                          onSelected,
+                                          onReplace: targetItem => {
+                                            return onChange(value => {
+                                              const newValue = (value || []).slice(0);
+                                              const index = newValue.findIndex(({ id }) => id === item.id);
+                                              const currentItem = newValue[index];
+                                              if (index > -1) {
+                                                newValue.splice(index, 1, Object.assign({}, typeof targetItem === 'function' ? targetItem(currentItem) : targetItem));
+                                              }
+                                              return newValue;
+                                            });
+                                          }
+                                        })
+                                      : defaultItem}
+                                  </Flex>
+                                  {removeOption}
                                 </Flex>
                               </List.Item>
                             );
@@ -151,6 +182,7 @@ const EntrySelector = createWithIntlProvider({
                         (typeof renderListTitle === 'function' &&
                           renderListTitle({
                             fetchApi,
+                            defaultTitle: formatMessage({ id: 'list' }),
                             searchProps,
                             setSearchProps
                           })) ||
@@ -197,17 +229,7 @@ const EntrySelector = createWithIntlProvider({
                   <List.Item
                     key={item.id}
                     onClick={() => {
-                      onChange(value => {
-                        const newValue = (value || []).slice(0);
-                        const index = newValue.findIndex(({ id }) => id === item.id);
-                        if (index > -1) {
-                          newValue.splice(index, 1);
-                        } else {
-                          newValue.push(Object.assign({}, item));
-                        }
-
-                        return newValue;
-                      });
+                      onSelected(item);
                     }}
                   >
                     <Checkbox checked={(value || []).findIndex(({ id }) => id === item.id) > -1} />
