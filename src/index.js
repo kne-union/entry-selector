@@ -178,17 +178,20 @@ const EntrySelector = createWithIntlProvider({
               <Col span={12}>
                 <div className={style['list-outer']}>
                   <Flex className={style['list-header']} justify="space-between">
-                    <div className={style['list-header-title']}>
-                      {listTitle ||
+                    {(() => {
+                      const defaultTitle = <div className={style['list-header-title']}>{formatMessage({ id: 'list' })}</div>;
+                      return (
+                        listTitle ||
                         (typeof renderListTitle === 'function' &&
                           renderListTitle({
                             fetchApi,
-                            defaultTitle: formatMessage({ id: 'list' }),
+                            defaultTitle,
                             searchProps,
                             setSearchProps
                           })) ||
-                        formatMessage({ id: 'list' })}
-                    </div>
+                        defaultTitle
+                      );
+                    })()}
                     <div>
                       {typeof getSearchProps === 'function' && (
                         <SearchInput
