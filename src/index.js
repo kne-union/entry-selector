@@ -177,7 +177,7 @@ const EntrySelector = createWithIntlProvider({
               </Col>
               <Col span={12}>
                 <div className={style['list-outer']}>
-                  <Flex className={style['list-header']} justify="space-between">
+                  <Flex className={style['list-header']} justify="space-between" gap={8}>
                     {(() => {
                       const defaultTitle = <div className={style['list-header-title']}>{formatMessage({ id: 'list' })}</div>;
                       return (
