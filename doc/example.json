@@ -2,8 +2,8 @@
   "isFull": false,
   "list": [
     {
-      "title": "这里填写示例标题",
-      "description": "这里填写示例说明",
+      "title": "基础用法",
+      "description": "展示EntrySelector组件的基本使用，包括条目选择、搜索过滤和拖拽排序功能",
       "code": "./base.js",
       "scope": [
         {
@@ -17,6 +17,48 @@
         {
           "name": "antd",
           "packageName": "antd"
+        }
+      ]
+    },
+    {
+      "title": "自定义渲染",
+      "description": "展示如何自定义渲染已选条目和可选条目，实现更丰富的交互功能",
+      "code": "./custom-render.js",
+      "scope": [
+        {
+          "name": "_EntrySelector",
+          "packageName": "@kne/current-lib_entry-selector",
+          "importStatement": "import * as _EntrySelector from \"@kne/entry-selector\""
+        },
+        {
+          "packageName": "@kne/current-lib_entry-selector/dist/index.css"
+        },
+        {
+          "name": "antd",
+          "packageName": "antd"
+        }
+      ]
+    },
+    {
+      "title": "完整功能",
+      "description": "展示EntrySelector的完整功能，包括添加新条目、操作选项、自定义标题等",
+      "code": "./full-features.js",
+      "scope": [
+        {
+          "name": "_EntrySelector",
+          "packageName": "@kne/current-lib_entry-selector",
+          "importStatement": "import * as _EntrySelector from \"@kne/entry-selector\""
+        },
+        {
+          "packageName": "@kne/current-lib_entry-selector/dist/index.css"
+        },
+        {
+          "name": "antd",
+          "packageName": "antd"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
         }
       ]
     }
