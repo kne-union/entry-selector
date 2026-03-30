@@ -1,18 +1,14 @@
-
 # entry-selector
-
 
 ### 描述
 
 EntrySelector是一个用于选择和管理条目列表的 React 组件。它提供了一个直观的界面，允许用户从可选列表中选择条目，并对已选条目进行管理，包括排序、搜索和删除等操作。
-
 
 ### 安装
 
 ```shell
 npm i --save @kne/entry-selector
 ```
-
 
 ### 概述
 
@@ -44,7 +40,6 @@ EntrySelector 适用于需要从预定义列表中选择多个条目并进行排
 
 ### 示例
 
-
 #### 示例样式
 
 ```scss
@@ -57,74 +52,69 @@ EntrySelector 适用于需要从预定义列表中选择多个条目并进行排
 
 #### 示例代码
 
-- 这里填写示例标题
-- 这里填写示例说明
+- 基础用法
+- 展示EntrySelector组件的基本使用，包括条目选择、搜索过滤和拖拽排序功能
 - _EntrySelector(@kne/current-lib_entry-selector)[import * as _EntrySelector from "@kne/entry-selector"],(@kne/current-lib_entry-selector/dist/index.css),antd(antd)
 
 ```jsx
 const { default: EntrySelector } = _EntrySelector;
-const { Switch, Flex } = antd;
+const { useState } = React;
+const { message } = antd;
+
+// 模拟面试题库数据
+const mockQuestionDatabase = [
+  { id: 1, title: '请简单介绍一下你自己', category: '个人介绍', difficulty: '简单' },
+  { id: 2, title: '你认为自己最大的优点和缺点是什么？', category: '性格分析', difficulty: '简单' },
+  { id: 3, title: '请描述一次你成功解决团队冲突的经历', category: '团队协作', difficulty: '中等' },
+  { id: 4, title: '你如何处理工作中的高压情况？请举例说明', category: '压力管理', difficulty: '中等' },
+  { id: 5, title: '请分享一次你快速作出决策的经验', category: '决策能力', difficulty: '中等' },
+  { id: 6, title: '你如何看待加班？如何平衡工作与生活？', category: '工作态度', difficulty: '简单' },
+  { id: 7, title: '描述一次你主动承担责任并超出预期的项目', category: '主动性', difficulty: '困难' },
+  { id: 8, title: '你如何让团队成员有效高质完成工作？', category: '团队管理', difficulty: '困难' }
+];
 
 const BaseExample = () => {
+  const [selectedQuestions, setSelectedQuestions] = useState([
+    { id: 1, title: '请简单介绍一下你自己' }
+  ]);
+
   return (
-    <div>
-      <EntrySelector
-        pagination={{ paramsType: 'params' }}
-        api={{
-          loader: data => {
-            console.log('fetch props:', data);
-            return {
-              totalCount: 3,
-              pageData: [
-                {
-                  id: 1,
-                  title: '你是什么性格的人？有哪些方面的不足？需要怎样改进？'
-                },
-                {
-                  id: 2,
-                  title: '你认为如何可以让一个员工有效高质的完成他的工作？'
-                },
-                {
-                  id: 3,
-                  title: '请分享一次你快速作出决定的经验，当时的情况怎样？你是怎么处理的？'
-                }
-              ].filter(({ title }) => !(data?.params?.title && title.indexOf(data.params.title) === -1))
-            };
+    <EntrySelector
+      value={selectedQuestions}
+      onChange={value => {
+        setSelectedQuestions(value);
+        message.success(&#96;已选择 ${value.length} 道题目&#96;);
+      }}
+      pagination={{ paramsType: 'params' }}
+      api={{
+        loader: async ({ params }) => {
+          // 模拟API请求延迟
+          await new Promise(resolve => setTimeout(resolve, 300));
+          
+          const { title } = params || {};
+          let filteredData = mockQuestionDatabase;
+          
+          // 根据搜索关键词过滤
+          if (title) {
+            filteredData = filteredData.filter(
+              item => item.title.includes(title) || item.category.includes(title)
+            );
           }
-        }}
-        getSearchProps={({ searchText }) => {
-          return { title: searchText };
-        }}
-        renderSelectedItem={(item, { el, onReplace }) => {
-          return (
-            <>
-              {el}
-              <Flex align="center" gap={8}>
-                <span>开启追问</span>
-                <Switch
-                  size="small"
-                  checked={item.hasProbe}
-                  onChange={checked => {
-                    onReplace(Object.assign({}, item, { hasProbe: checked }));
-                  }}
-                />
-              </Flex>
-            </>
-          );
-        }}
-        onChange={value => {
-          console.log('>>>>>>>>', value);
-        }}
-        options={[
-          {
-            children: '操作1'
-          },
-          {
-            children: '操作2'
-          }
-        ]}
-      />
-    </div>
+          
+          return {
+            totalCount: filteredData.length,
+            pageData: filteredData
+          };
+        }
+      }}
+      getSearchProps={({ searchText }) => {
+        return { title: searchText };
+      }}
+      searchPlaceholder="搜索题目或分类"
+      selectedTitle="已选题目（可拖拽排序）"
+      listTitle="题目库"
+      maxScrollerHeight={600}
+    />
   );
 };
 
@@ -132,6 +122,341 @@ render(<BaseExample />);
 
 ```
 
+- 自定义渲染
+- 展示如何自定义渲染已选条目和可选条目，实现更丰富的交互功能
+- _EntrySelector(@kne/current-lib_entry-selector)[import * as _EntrySelector from "@kne/entry-selector"],(@kne/current-lib_entry-selector/dist/index.css),antd(antd)
+
+```jsx
+const { default: EntrySelector } = _EntrySelector;
+const { useState } = React;
+const { Tag, Switch, Flex, message } = antd;
+
+// 模拟产品特性数据
+const mockFeatures = [
+  { id: 1, title: '用户注册登录', status: '已完成', priority: 'high', category: '基础功能' },
+  { id: 2, title: '商品搜索与筛选', status: '开发中', priority: 'high', category: '核心功能' },
+  { id: 3, title: '购物车功能', status: '已完成', priority: 'high', category: '核心功能' },
+  { id: 4, title: '订单管理', status: '待开发', priority: 'medium', category: '核心功能' },
+  { id: 5, title: '支付集成', status: '待开发', priority: 'high', category: '核心功能' },
+  { id: 6, title: '用户评价系统', status: '开发中', priority: 'medium', category: '增值功能' },
+  { id: 7, title: '数据统计面板', status: '待开发', priority: 'low', category: '增值功能' },
+  { id: 8, title: '消息推送', status: '已完成', priority: 'medium', category: '增值功能' }
+];
+
+const priorityColors = {
+  high: 'red',
+  medium: 'orange',
+  low: 'blue'
+};
+
+const statusColors = {
+  '已完成': 'green',
+  '开发中': 'blue',
+  '待开发': 'default'
+};
+
+const CustomRenderExample = () => {
+  const [selectedFeatures, setSelectedFeatures] = useState([]);
+
+  return (
+    <EntrySelector
+      value={selectedFeatures}
+      onChange={setSelectedFeatures}
+      pagination={{ paramsType: 'params' }}
+      api={{
+        loader: async ({ params }) => {
+          await new Promise(resolve => setTimeout(resolve, 300));
+          
+          const { title } = params || {};
+          let filteredData = mockFeatures;
+          
+          if (title) {
+            filteredData = filteredData.filter(
+              item => item.title.includes(title) || item.category.includes(title)
+            );
+          }
+          
+          return {
+            totalCount: filteredData.length,
+            pageData: filteredData
+          };
+        }
+      }}
+      getSearchProps={({ searchText }) => ({ title: searchText })}
+      searchPlaceholder="搜索特性名称或分类"
+      selectedTitle="已选特性（需排期开发）"
+      // 自定义渲染已选条目：展示优先级开关
+      renderSelectedItem={(item, { el, onReplace }) => {
+        return (
+          <Flex vertical gap={4} style={{ width: '100%' }}>
+            {el}
+            <Flex align="center" gap={8}>
+              <span style={{ fontSize: '12px' }}>高优先级</span>
+              <Switch
+                size="small"
+                checked={item.isPriority}
+                onChange={checked => {
+                  onReplace({ ...item, isPriority: checked });
+                  message.info(&#96;已${checked ? '开启' : '关闭'} "${item.title}" 的优先级&#96;);
+                }}
+              />
+            </Flex>
+          </Flex>
+        );
+      }}
+      // 自定义渲染可选条目：展示标签和状态
+      renderItem={(item, { el }) => {
+        return (
+          <Flex vertical gap={4}>
+            {el}
+            <Flex gap={4}>
+              <Tag color={statusColors[item.status]} style={{ margin: 0 }}>
+                {item.status}
+              </Tag>
+              <Tag color={priorityColors[item.priority]} style={{ margin: 0 }}>
+                {item.priority === 'high' ? '高' : item.priority === 'medium' ? '中' : '低'}
+              </Tag>
+              <Tag color="purple" style={{ margin: 0 }}>
+                {item.category}
+              </Tag>
+            </Flex>
+          </Flex>
+        );
+      }}
+      // 自定义渲染操作选项
+      renderOptions={(item, { fetchApi }) => {
+        return [
+          {
+            children: '查看详情',
+            onClick: () => {
+              message.info(&#96;查看特性：${item.title}&#96;);
+            }
+          },
+          {
+            children: '编辑',
+            onClick: () => {
+              message.info(&#96;编辑特性：${item.title}&#96;);
+            }
+          }
+        ];
+      }}
+      maxScrollerHeight={600}
+    />
+  );
+};
+
+render(<CustomRenderExample />);
+
+```
+
+- 完整功能
+- 展示EntrySelector的完整功能，包括添加新条目、操作选项、自定义标题等
+- _EntrySelector(@kne/current-lib_entry-selector)[import * as _EntrySelector from "@kne/entry-selector"],(@kne/current-lib_entry-selector/dist/index.css),antd(antd),remoteLoader(@kne/remote-loader)
+
+```jsx
+const { default: EntrySelector } = _EntrySelector;
+const { createWithRemoteLoader } = remoteLoader;
+const { useState } = React;
+const { Button, Modal, Form, Input, Select, message, Tag, Flex } = antd;
+
+// 模拟候选人技能数据
+const mockSkillsDatabase = [
+  { id: 1, title: 'JavaScript', level: 'advanced', category: '前端开发' },
+  { id: 2, title: 'TypeScript', level: 'advanced', category: '前端开发' },
+  { id: 3, title: 'React', level: 'advanced', category: '前端框架' },
+  { id: 4, title: 'Vue.js', level: 'intermediate', category: '前端框架' },
+  { id: 5, title: 'Node.js', level: 'advanced', category: '后端开发' },
+  { id: 6, title: 'Python', level: 'intermediate', category: '后端开发' },
+  { id: 7, title: 'MySQL', level: 'advanced', category: '数据库' },
+  { id: 8, title: 'MongoDB', level: 'intermediate', category: '数据库' },
+  { id: 9, title: 'Docker', level: 'intermediate', category: '运维工具' },
+  { id: 10, title: 'Git', level: 'advanced', category: '版本控制' }
+];
+
+const levelColors = {
+  advanced: 'green',
+  intermediate: 'blue',
+  beginner: 'orange'
+};
+
+const levelLabels = {
+  advanced: '精通',
+  intermediate: '熟练',
+  beginner: '了解'
+};
+
+const FullFeaturesExample = createWithRemoteLoader({
+  modules: ['components-core:Global@PureGlobal']
+})(({ remoteModules }) => {
+  const [PureGlobal] = remoteModules;
+  const [selectedSkills, setSelectedSkills] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [form] = Form.useForm();
+
+  // 处理添加新技能
+  const handleAdd = ({ fetchApi, onChange }) => {
+    setModalVisible(true);
+  };
+
+  // 提交新技能
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validateFields();
+      const newSkill = {
+        id: Date.now(),
+        ...values,
+        isNew: true
+      };
+      onChange(prev => [...prev, newSkill]);
+      message.success(&#96;已添加技能：${values.title}&#96;);
+      setModalVisible(false);
+      form.resetFields();
+    } catch (error) {
+      console.error('表单验证失败:', error);
+    }
+  };
+
+  return (
+    <PureGlobal
+      preset={{
+        ajax: async api => {
+          return { data: { code: 0, data: api.loader() } };
+        }
+      }}
+    >
+      <EntrySelector
+        value={selectedSkills}
+        onChange={setSelectedSkills}
+        // 添加新条目功能
+        onAdd={handleAdd}
+        // API配置
+        pagination={{ paramsType: 'params' }}
+        api={{
+          loader: async ({ params }) => {
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            const { title } = params || {};
+            let filteredData = mockSkillsDatabase;
+            
+            if (title) {
+              filteredData = filteredData.filter(
+                item => item.title.toLowerCase().includes(title.toLowerCase()) || 
+                       item.category.includes(title)
+              );
+            }
+            
+            return {
+              totalCount: filteredData.length,
+              pageData: filteredData
+            };
+          }
+        }}
+        // 搜索配置
+        getSearchProps={({ searchText }) => ({ title: searchText })}
+        searchPlaceholder="搜索技能名称或分类"
+        // 自定义标题
+        selectedTitle="候选人技能清单（可拖拽调整顺序）"
+        renderListTitle={({ fetchApi, searchProps, setSearchProps }) => (
+          <Flex justify="space-between" align="center" style={{ width: '100%' }}>
+            <span style={{ fontWeight: 'bold', fontSize: '14px' }}>
+              技能库 ({fetchApi.data?.totalCount || 0} 项)
+            </span>
+          </Flex>
+        )}
+        // 自定义渲染已选条目
+        renderSelectedItem={(item, { el, onReplace }) => (
+          <Flex vertical gap={4} style={{ width: '100%' }}>
+            {el}
+            {item.isNew && <Tag color="cyan" style={{ margin: 0 }}>新增</Tag>}
+          </Flex>
+        )}
+        // 自定义渲染可选条目
+        renderItem={(item, { el }) => (
+          <Flex vertical gap={4}>
+            {el}
+            <Flex gap={4}>
+              <Tag color={levelColors[item.level]} style={{ margin: 0 }}>
+                {levelLabels[item.level]}
+              </Tag>
+              <Tag color="purple" style={{ margin: 0 }}>
+                {item.category}
+              </Tag>
+            </Flex>
+          </Flex>
+        )}
+        // 操作选项
+        options={[
+          {
+            children: '查看详情',
+            onClick: (e, item) => {
+              Modal.info({
+                title: item.title,
+                content: (
+                  <div>
+                    <p>技能等级：{levelLabels[item.level]}</p>
+                    <p>所属分类：{item.category}</p>
+                  </div>
+                )
+              });
+            }
+          },
+          {
+            children: '添加到收藏',
+            onClick: (e, item) => {
+              message.success(&#96;已收藏技能：${item.title}&#96;);
+            }
+          }
+        ]}
+        maxScrollerHeight={600}
+      />
+
+      {/* 添加新技能的弹窗 */}
+      <Modal
+        title="添加新技能"
+        open={modalVisible}
+        onOk={handleSubmit}
+        onCancel={() => {
+          setModalVisible(false);
+          form.resetFields();
+        }}
+        okText="确定"
+        cancelText="取消"
+      >
+        <Form form={form} layout="vertical">
+          <Form.Item
+            label="技能名称"
+            name="title"
+            rules={[{ required: true, message: '请输入技能名称' }]}
+          >
+            <Input placeholder="例如：GraphQL" />
+          </Form.Item>
+          <Form.Item
+            label="熟练程度"
+            name="level"
+            rules={[{ required: true, message: '请选择熟练程度' }]}
+          >
+            <Select placeholder="请选择">
+              <Select.Option value="beginner">了解</Select.Option>
+              <Select.Option value="intermediate">熟练</Select.Option>
+              <Select.Option value="advanced">精通</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item
+            label="所属分类"
+            name="category"
+            rules={[{ required: true, message: '请输入所属分类' }]}
+          >
+            <Input placeholder="例如：前端开发、后端开发" />
+          </Form.Item>
+        </Form>
+      </Modal>
+    </PureGlobal>
+  );
+});
+
+render(<FullFeaturesExample />);
+
+```
 
 ### API
 

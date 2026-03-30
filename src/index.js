@@ -22,7 +22,7 @@ const EntrySelector = createWithIntlProvider({
     'en-US': enUS
   },
   namespace: 'entry-selector'
-})(({ onAdd, api, options, selectedTitle, listTitle, renderListTitle, renderSelectedItem, renderItem, renderOptions, getSearchProps, searchPlaceholder, maxScrollerHeight = 800, ...props }) => {
+})(({ className, onAdd, api, options, selectedTitle, listTitle, renderListTitle, renderSelectedItem, renderItem, renderOptions, getSearchProps, searchPlaceholder, maxScrollerHeight = 800, ...props }) => {
   const [value, onChange] = useControllerValue(props);
   const [searchProps, setSearchProps] = useState({});
   const { formatMessage } = useIntl();
@@ -46,7 +46,7 @@ const EntrySelector = createWithIntlProvider({
     <Flex
       vertical
       gap={8}
-      className={style['entry-selector']}
+      className={classnames(className, style['entry-selector'])}
       style={{
         '--max-scroller-height': `${maxScrollerHeight}px`
       }}
@@ -195,6 +195,7 @@ const EntrySelector = createWithIntlProvider({
                     <div>
                       {typeof getSearchProps === 'function' && (
                         <SearchInput
+                          className={style['list-header-search']}
                           size="small"
                           placeholder={searchPlaceholder || formatMessage({ id: 'searchPlaceholder' })}
                           value={searchProps.searchText}
