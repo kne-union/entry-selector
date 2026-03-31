@@ -16,6 +16,7 @@
 | listTitle          | String   | -   | 自定义可选列表的标题，未设置时使用国际化文本                                                |
 | renderListTitle    | Function | -   | 自定义渲染列表标题的函数，参数为包含fetchApi、searchProps、setSearchProps的对象              |
 | maxScrollerHeight  | Number   | 800 | 设置滚动区域的最大高度（单位：像素）                                                    |
+| showClearButton    | Boolean  | true | 是否显示清空按钮，默认显示                                                       |
 
 ### 国际化支持
 
@@ -34,3 +35,4 @@
 | selected          | 已选     | Selected             |
 | list              | 列表     | List                 |
 | searchPlaceholder | 请输入关键字 | Please input keyword |
+| clear             | 清空     | Clear                |
