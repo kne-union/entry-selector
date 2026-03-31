@@ -3,7 +3,7 @@ import zhCn from './locale/zh-CN';
 import enUS from './locale/en-US';
 import { ReactSortable } from 'react-sortablejs';
 import { createWithIntlProvider, useIntl } from '@kne/react-intl';
-import { MoreOutlined, HolderOutlined, DeleteOutlined } from '@ant-design/icons';
+import { MoreOutlined, HolderOutlined, DeleteOutlined, ClearOutlined } from '@ant-design/icons';
 import ButtonGroup, { ConfirmButton } from '@kne/button-group';
 import useControllerValue from '@kne/use-control-value';
 import { FetchScrollLoader } from '@kne/scroll-loader';
@@ -22,7 +22,7 @@ const EntrySelector = createWithIntlProvider({
     'en-US': enUS
   },
   namespace: 'entry-selector'
-})(({ className, onAdd, api, options, selectedTitle, listTitle, renderListTitle, renderSelectedItem, renderItem, renderOptions, getSearchProps, searchPlaceholder, maxScrollerHeight = 800, ...props }) => {
+})(({ className, onAdd, api, options, selectedTitle, listTitle, renderListTitle, renderSelectedItem, renderItem, renderOptions, getSearchProps, searchPlaceholder, maxScrollerHeight = 800, showClearButton = true, ...props }) => {
   const [value, onChange] = useControllerValue(props);
   const [searchProps, setSearchProps] = useState({});
   const { formatMessage } = useIntl();
@@ -93,7 +93,22 @@ const EntrySelector = createWithIntlProvider({
             <Row gutter={[12, 12]}>
               <Col span={12}>
                 <div className={style['list-outer']}>
-                  {totalCount > 0 && <div className={style['list-header']}>{selectedTitle || formatMessage({ id: 'selected' })}</div>}
+                  {totalCount > 0 && (
+                    <Flex className={style['list-header']} justify="space-between" align="center">
+                      <div className={style['list-header-title']}>{selectedTitle || formatMessage({ id: 'selected' })}</div>
+                      {showClearButton && value && value.length > 0 && (
+                        <Button
+                          type="link"
+                          size="small"
+                          title={formatMessage({ id: 'clear' })}
+                          icon={<ClearOutlined />}
+                          onClick={() => {
+                            onChange([]);
+                          }}
+                        />
+                      )}
+                    </Flex>
+                  )}
                   <SimpleBar className={style['list-scroll']} autoHide={false}>
                     {value && value.length > 0 ? (
                       <List className={style['list']} size="small">
