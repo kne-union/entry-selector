@@ -192,34 +192,42 @@ const EntrySelector = createWithIntlProvider({
               </Col>
               <Col span={12}>
                 <div className={style['list-outer']}>
-                  <Flex className={style['list-header']} justify="space-between" gap={8}>
-                    {(() => {
-                      const defaultTitle = <div className={style['list-header-title']}>{formatMessage({ id: 'list' })}</div>;
-                      return (
-                        listTitle ||
-                        (typeof renderListTitle === 'function' &&
-                          renderListTitle({
+                  <Flex
+                    className={classnames(style['list-header'], {
+                      [style['list-header-plain']]: listTitle != null
+                    })}
+                    justify="space-between"
+                    gap={8}
+                    align="center"
+                  >
+                    <div className={style['list-header-content']}>
+                      {(() => {
+                        if (listTitle != null) {
+                          return listTitle;
+                        }
+                        const defaultTitle = <div className={style['list-header-title']}>{formatMessage({ id: 'list' })}</div>;
+                        if (typeof renderListTitle === 'function') {
+                          return renderListTitle({
                             fetchApi,
                             defaultTitle,
                             searchProps,
                             setSearchProps
-                          })) ||
-                        defaultTitle
-                      );
-                    })()}
-                    <div>
-                      {typeof getSearchProps === 'function' && (
-                        <SearchInput
-                          className={style['list-header-search']}
-                          size="small"
-                          placeholder={searchPlaceholder || formatMessage({ id: 'searchPlaceholder' })}
-                          value={searchProps.searchText}
-                          onSearch={value => {
-                            setSearchProps(searchProps => Object.assign({}, searchProps, { searchText: value }));
-                          }}
-                        />
-                      )}
+                          });
+                        }
+                        return defaultTitle;
+                      })()}
                     </div>
+                    {typeof getSearchProps === 'function' && (
+                      <SearchInput
+                        className={style['list-header-search']}
+                        size="small"
+                        placeholder={searchPlaceholder || formatMessage({ id: 'searchPlaceholder' })}
+                        value={searchProps.searchText}
+                        onSearch={value => {
+                          setSearchProps(searchProps => Object.assign({}, searchProps, { searchText: value }));
+                        }}
+                      />
+                    )}
                   </Flex>
                   {children}
                 </div>
