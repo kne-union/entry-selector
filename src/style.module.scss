@@ -1,7 +1,26 @@
+@use '~@kne/responsive-utils/scss' as resp;
+
+// 自建容器：以组件自身宽度触发 mobile-container（example 手机预览 / 窄栏嵌入均生效）
+.root {
+  @include resp.responsive-container;
+  width: 100%;
+}
+
 .entry-selector {
   background: #f6f7f9;
   border-radius: 12px;
   padding: 16px;
+}
+
+.columns {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.column {
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 .list-outer {
@@ -155,4 +174,64 @@
 .sortable-ghost {
   background: var(--primary-color-1);
   border: 1px dashed var(--primary-color) !important;
+}
+
+@include resp.mobile-container {
+  .entry-selector {
+    padding: 12px;
+    border-radius: 8px;
+  }
+
+  // 左右双列 → 上下堆叠（不依赖 useIsMobile / antd Col）
+  .columns {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .column {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+
+  .list-outer {
+    border-radius: 8px;
+  }
+
+  .list-header {
+    padding: 10px 12px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .list-header-search {
+    width: 100%;
+  }
+
+  .list-scroll {
+    max-height: min(var(--max-scroller-height, 800px), 50vh);
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .list {
+    min-height: 120px;
+  }
+
+  .list-item-content {
+    :global(.list-item-remove-btn) {
+      opacity: 1;
+    }
+  }
+
+  .columns-control-content-item {
+    padding: 10px 12px !important;
+
+    &.is-drag {
+      :global {
+        .sortable-drag-handle {
+          padding: 14px 6px;
+        }
+      }
+    }
+  }
 }

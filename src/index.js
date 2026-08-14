@@ -7,9 +7,10 @@ import { MoreOutlined, HolderOutlined, DeleteOutlined, ClearOutlined } from '@an
 import ButtonGroup, { ConfirmButton } from '@kne/button-group';
 import useControllerValue from '@kne/use-control-value';
 import { FetchScrollLoader } from '@kne/scroll-loader';
+import { useIsMobile } from '@kne/responsive-utils';
 import classnames from 'classnames';
 import SearchInput from '@kne/search-input';
-import { Flex, Button, Row, Col, List, Empty, Checkbox } from 'antd';
+import { Flex, Button, List, Empty, Checkbox } from 'antd';
 import SimpleBar from 'simplebar-react';
 import 'simplebar/dist/simplebar.min.css';
 import '@kne/button-group/dist/index.css';
@@ -26,6 +27,7 @@ const EntrySelector = createWithIntlProvider({
   const [value, onChange] = useControllerValue(props);
   const [searchProps, setSearchProps] = useState({});
   const { formatMessage } = useIntl();
+  const isMobile = useIsMobile();
   const ref = useRef(null);
   const selectedMappingRef = useRef(new Map());
   const onSelected = item => {
@@ -43,252 +45,263 @@ const EntrySelector = createWithIntlProvider({
   };
 
   return (
-    <Flex
-      vertical
-      gap={8}
-      className={classnames(className, style['entry-selector'])}
-      style={{
-        '--max-scroller-height': `${maxScrollerHeight}px`
-      }}
-    >
-      {typeof onAdd === 'function' && (
-        <Flex>
-          <Button
-            shape="round"
-            size="small"
-            type="primary"
-            onClick={() => {
-              onAdd({ fetchApi: ref.current, value, onChange });
-            }}
-          >
-            {formatMessage({ id: 'add' })}
-          </Button>
-        </Flex>
-      )}
-      <FetchScrollLoader
-        {...props}
-        completeTips={null}
-        searchProps={searchProps}
-        getSearchProps={getSearchProps}
-        api={api}
-        ref={ref}
-        className={style['list-scroll']}
-        autoHide={false}
-        render={({ fetchApi, children }) => {
-          const { data } = fetchApi;
-          const { pageData, totalCount } = Object.assign(
-            {},
-            {
-              pageData: [],
-              totalCount: 0
-            },
-            data
-          );
-          pageData.forEach(item => {
-            selectedMappingRef.current.set(item.id, item);
-          });
-          const listMapping = selectedMappingRef.current;
-          const currentList = (value || []).map(item => Object.assign({}, listMapping.get(item.id) || item));
-          return (
-            <Row gutter={[12, 12]}>
-              <Col span={12}>
-                <div className={style['list-outer']}>
-                  {totalCount > 0 && (
-                    <Flex className={style['list-header']} justify="space-between" align="center">
-                      <div className={style['list-header-title']}>{selectedTitle || formatMessage({ id: 'selected' })}</div>
-                      {showClearButton && value && value.length > 0 && (
-                        <Button
-                          type="link"
-                          size="small"
-                          title={formatMessage({ id: 'clear' })}
-                          icon={<ClearOutlined />}
+    // 自建 kne-responsive 容器，保证 mobile-container 在组件宽度 <768 时生效（含 example 手机预览）
+    <div className={style['root']}>
+      <Flex
+        vertical
+        gap={isMobile ? 12 : 8}
+        className={classnames(className, style['entry-selector'])}
+        style={{
+          '--max-scroller-height': `${maxScrollerHeight}px`
+        }}
+      >
+        {typeof onAdd === 'function' && (
+          <Flex>
+            <Button
+              shape="round"
+              size="small"
+              type="primary"
+              onClick={() => {
+                onAdd({ fetchApi: ref.current, value, onChange });
+              }}
+            >
+              {formatMessage({ id: 'add' })}
+            </Button>
+          </Flex>
+        )}
+        <FetchScrollLoader
+          {...props}
+          completeTips={null}
+          searchProps={searchProps}
+          getSearchProps={getSearchProps}
+          api={api}
+          ref={ref}
+          className={style['list-scroll']}
+          autoHide={false}
+          useSimpleBar={!isMobile}
+          render={({ fetchApi, children }) => {
+            const { data } = fetchApi;
+            const { pageData, totalCount } = Object.assign(
+              {},
+              {
+                pageData: [],
+                totalCount: 0
+              },
+              data
+            );
+            pageData.forEach(item => {
+              selectedMappingRef.current.set(item.id, item);
+            });
+            const listMapping = selectedMappingRef.current;
+            const currentList = (value || []).map(item => Object.assign({}, listMapping.get(item.id) || item));
+            const selectedListBody =
+              value && value.length > 0 ? (
+                <List className={style['list']} size="small">
+                  <ReactSortable
+                    filter=".sortable-ignore-elements"
+                    handle=".sortable-drag-handle"
+                    dragClass={style['sortable-drag']}
+                    ghostClass={style['sortable-ghost']}
+                    forceFallback
+                    animation={300}
+                    delayOnTouchStart
+                    delay={2}
+                    list={currentList}
+                    setList={list => {
+                      onChange(value => {
+                        const mapping = new Map((value || []).map(item => [item.id, item]));
+                        return list.map(({ id }) => {
+                          return mapping.get(id);
+                        });
+                      });
+                    }}
+                  >
+                    {currentList.map((item, index) => {
+                      const defaultItem = <span className={'list-item-title'}>{item.title}</span>;
+                      const removeOption = (
+                        <ConfirmButton
+                          color="danger"
+                          variant="filled"
+                          className={'list-item-remove-btn'}
+                          icon={<DeleteOutlined />}
                           onClick={() => {
-                            onChange([]);
+                            onSelected(item);
+                          }}
+                        />
+                      );
+                      const mapping = new Map((value || []).map(item => [item.id, item]));
+                      return (
+                        <List.Item key={item.id} className={classnames(style['columns-control-content-item'], style['is-drag'])}>
+                          <HolderOutlined className={classnames('sortable-drag-handle', style['columns-control-content-item-icon'])} />
+                          <div className={style['list-index']}>{index + 1}</div>
+                          <Flex justify="space-between" gap={8} flex={1} className={style['list-item-content']}>
+                            <Flex vertical flex={1}>
+                              {typeof renderSelectedItem === 'function'
+                                ? renderSelectedItem(mapping.get(item.id), {
+                                    el: defaultItem,
+                                    removeOptionEl: removeOption,
+                                    target: item,
+                                    fetchApi,
+                                    searchProps,
+                                    setSearchProps,
+                                    onChange,
+                                    onSelected,
+                                    onReplace: targetItem => {
+                                      return onChange(value => {
+                                        const newValue = (value || []).slice(0);
+                                        const index = newValue.findIndex(({ id }) => id === item.id);
+                                        const currentItem = newValue[index];
+                                        if (index > -1) {
+                                          newValue.splice(index, 1, Object.assign({}, typeof targetItem === 'function' ? targetItem(currentItem) : targetItem));
+                                        }
+                                        return newValue;
+                                      });
+                                    }
+                                  })
+                                : defaultItem}
+                            </Flex>
+                            {removeOption}
+                          </Flex>
+                        </List.Item>
+                      );
+                    })}
+                  </ReactSortable>
+                </List>
+              ) : (
+                <Flex className={style['list']} justify="center" align="center">
+                  <Empty />
+                </Flex>
+              );
+            return (
+              <div className={style['columns']}>
+                <div className={style['column']}>
+                  <div className={style['list-outer']}>
+                    {totalCount > 0 && (
+                      <Flex className={style['list-header']} justify="space-between" align="center">
+                        <div className={style['list-header-title']}>{selectedTitle || formatMessage({ id: 'selected' })}</div>
+                        {showClearButton && value && value.length > 0 && (
+                          <Button
+                            type="link"
+                            size="small"
+                            title={formatMessage({ id: 'clear' })}
+                            icon={<ClearOutlined />}
+                            onClick={() => {
+                              onChange([]);
+                            }}
+                          />
+                        )}
+                      </Flex>
+                    )}
+                    {isMobile ? (
+                      <div className={style['list-scroll']}>{selectedListBody}</div>
+                    ) : (
+                      <SimpleBar className={style['list-scroll']} autoHide={false}>
+                        {selectedListBody}
+                      </SimpleBar>
+                    )}
+                  </div>
+                </div>
+                <div className={style['column']}>
+                  <div className={style['list-outer']}>
+                    <Flex
+                      className={classnames(style['list-header'], {
+                        [style['list-header-plain']]: listTitle != null
+                      })}
+                      vertical={isMobile}
+                      justify="space-between"
+                      gap={8}
+                      align={isMobile ? 'stretch' : 'center'}
+                    >
+                      <div className={style['list-header-content']}>
+                        {(() => {
+                          if (listTitle != null) {
+                            return listTitle;
+                          }
+                          const defaultTitle = <div className={style['list-header-title']}>{formatMessage({ id: 'list' })}</div>;
+                          if (typeof renderListTitle === 'function') {
+                            return renderListTitle({
+                              fetchApi,
+                              defaultTitle,
+                              searchProps,
+                              setSearchProps
+                            });
+                          }
+                          return defaultTitle;
+                        })()}
+                      </div>
+                      {typeof getSearchProps === 'function' && (
+                        <SearchInput
+                          className={style['list-header-search']}
+                          size="small"
+                          placeholder={searchPlaceholder || formatMessage({ id: 'searchPlaceholder' })}
+                          value={searchProps.searchText}
+                          onSearch={value => {
+                            setSearchProps(searchProps => Object.assign({}, searchProps, { searchText: value }));
                           }}
                         />
                       )}
                     </Flex>
-                  )}
-                  <SimpleBar className={style['list-scroll']} autoHide={false}>
-                    {value && value.length > 0 ? (
-                      <List className={style['list']} size="small">
-                        <ReactSortable
-                          filter=".sortable-ignore-elements"
-                          handle=".sortable-drag-handle"
-                          dragClass={style['sortable-drag']}
-                          ghostClass={style['sortable-ghost']}
-                          forceFallback
-                          animation={300}
-                          delayOnTouchStart
-                          delay={2}
-                          list={currentList}
-                          setList={list => {
-                            onChange(value => {
-                              const mapping = new Map((value || []).map(item => [item.id, item]));
-                              return list.map(({ id }) => {
-                                return mapping.get(id);
-                              });
-                            });
+                    {children}
+                  </div>
+                </div>
+              </div>
+            );
+          }}
+        >
+          {({ fetchApi, list }) => {
+            return (
+              <List
+                className={classnames(style['list'], style['list-lib'])}
+                size="small"
+                dataSource={list}
+                renderItem={item => {
+                  const defaultItem = <span className={'list-item-title'}>{item.title}</span>;
+                  const targetOptions =
+                    typeof renderOptions === 'function'
+                      ? renderOptions(item, {
+                          searchProps,
+                          setSearchProps,
+                          fetchApi,
+                          options
+                        })
+                      : options;
+                  return (
+                    <List.Item
+                      key={item.id}
+                      onClick={() => {
+                        onSelected(item);
+                      }}
+                    >
+                      <Checkbox checked={(value || []).findIndex(({ id }) => id === item.id) > -1} />
+                      <Flex vertical flex={1}>
+                        {typeof renderItem === 'function'
+                          ? renderItem(item, {
+                              fetchApi,
+                              el: defaultItem,
+                              searchProps,
+                              setSearchProps
+                            })
+                          : defaultItem}
+                      </Flex>
+                      {targetOptions && (
+                        <Flex
+                          flex={'0 0 50px'}
+                          onClick={e => {
+                            e.stopPropagation();
                           }}
                         >
-                          {currentList.map((item, index) => {
-                            const defaultItem = <span className={'list-item-title'}>{item.title}</span>;
-                            const removeOption = (
-                              <ConfirmButton
-                                color="danger"
-                                variant="filled"
-                                className={'list-item-remove-btn'}
-                                icon={<DeleteOutlined />}
-                                onClick={() => {
-                                  onSelected(item);
-                                }}
-                              />
-                            );
-                            const mapping = new Map((value || []).map(item => [item.id, item]));
-                            return (
-                              <List.Item key={item.id} className={classnames(style['columns-control-content-item'], style['is-drag'])}>
-                                <HolderOutlined className={classnames('sortable-drag-handle', style['columns-control-content-item-icon'])} />
-                                <div className={style['list-index']}>{index + 1}</div>
-                                <Flex justify="space-between" gap={8} flex={1} className={style['list-item-content']}>
-                                  <Flex vertical flex={1}>
-                                    {typeof renderSelectedItem === 'function'
-                                      ? renderSelectedItem(mapping.get(item.id), {
-                                          el: defaultItem,
-                                          removeOptionEl: removeOption,
-                                          target: item,
-                                          fetchApi,
-                                          searchProps,
-                                          setSearchProps,
-                                          onChange,
-                                          onSelected,
-                                          onReplace: targetItem => {
-                                            return onChange(value => {
-                                              const newValue = (value || []).slice(0);
-                                              const index = newValue.findIndex(({ id }) => id === item.id);
-                                              const currentItem = newValue[index];
-                                              if (index > -1) {
-                                                newValue.splice(index, 1, Object.assign({}, typeof targetItem === 'function' ? targetItem(currentItem) : targetItem));
-                                              }
-                                              return newValue;
-                                            });
-                                          }
-                                        })
-                                      : defaultItem}
-                                  </Flex>
-                                  {removeOption}
-                                </Flex>
-                              </List.Item>
-                            );
-                          })}
-                        </ReactSortable>
-                      </List>
-                    ) : (
-                      <Flex className={style['list']} justify="center" align="center">
-                        <Empty />
-                      </Flex>
-                    )}
-                  </SimpleBar>
-                </div>
-              </Col>
-              <Col span={12}>
-                <div className={style['list-outer']}>
-                  <Flex
-                    className={classnames(style['list-header'], {
-                      [style['list-header-plain']]: listTitle != null
-                    })}
-                    justify="space-between"
-                    gap={8}
-                    align="center"
-                  >
-                    <div className={style['list-header-content']}>
-                      {(() => {
-                        if (listTitle != null) {
-                          return listTitle;
-                        }
-                        const defaultTitle = <div className={style['list-header-title']}>{formatMessage({ id: 'list' })}</div>;
-                        if (typeof renderListTitle === 'function') {
-                          return renderListTitle({
-                            fetchApi,
-                            defaultTitle,
-                            searchProps,
-                            setSearchProps
-                          });
-                        }
-                        return defaultTitle;
-                      })()}
-                    </div>
-                    {typeof getSearchProps === 'function' && (
-                      <SearchInput
-                        className={style['list-header-search']}
-                        size="small"
-                        placeholder={searchPlaceholder || formatMessage({ id: 'searchPlaceholder' })}
-                        value={searchProps.searchText}
-                        onSearch={value => {
-                          setSearchProps(searchProps => Object.assign({}, searchProps, { searchText: value }));
-                        }}
-                      />
-                    )}
-                  </Flex>
-                  {children}
-                </div>
-              </Col>
-            </Row>
-          );
-        }}
-      >
-        {({ fetchApi, list }) => {
-          return (
-            <List
-              className={classnames(style['list'], style['list-lib'])}
-              size="small"
-              dataSource={list}
-              renderItem={item => {
-                const defaultItem = <span className={'list-item-title'}>{item.title}</span>;
-                const targetOptions =
-                  typeof renderOptions === 'function'
-                    ? renderOptions(item, {
-                        searchProps,
-                        setSearchProps,
-                        fetchApi,
-                        options
-                      })
-                    : options;
-                return (
-                  <List.Item
-                    key={item.id}
-                    onClick={() => {
-                      onSelected(item);
-                    }}
-                  >
-                    <Checkbox checked={(value || []).findIndex(({ id }) => id === item.id) > -1} />
-                    <Flex vertical flex={1}>
-                      {typeof renderItem === 'function'
-                        ? renderItem(item, {
-                            fetchApi,
-                            el: defaultItem,
-                            searchProps,
-                            setSearchProps
-                          })
-                        : defaultItem}
-                    </Flex>
-                    {targetOptions && (
-                      <Flex
-                        flex={'0 0 50px'}
-                        onClick={e => {
-                          e.stopPropagation();
-                        }}
-                      >
-                        <ButtonGroup more={<Button type="link" icon={<MoreOutlined />} />} list={targetOptions} />
-                      </Flex>
-                    )}
-                  </List.Item>
-                );
-              }}
-            />
-          );
-        }}
-      </FetchScrollLoader>
-    </Flex>
+                          <ButtonGroup more={<Button type="link" icon={<MoreOutlined />} />} list={targetOptions} />
+                        </Flex>
+                      )}
+                    </List.Item>
+                  );
+                }}
+              />
+            );
+          }}
+        </FetchScrollLoader>
+      </Flex>
+    </div>
   );
 });
 
