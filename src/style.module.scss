@@ -1,9 +1,26 @@
 @use '~@kne/responsive-utils/scss' as resp;
 
+// 自建容器：以组件自身宽度触发 mobile-container（example 手机预览 / 窄栏嵌入均生效）
+.root {
+  @include resp.responsive-container;
+  width: 100%;
+}
+
 .entry-selector {
   background: #f6f7f9;
   border-radius: 12px;
   padding: 16px;
+}
+
+.columns {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.column {
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 .list-outer {
@@ -165,6 +182,17 @@
     border-radius: 8px;
   }
 
+  // 左右双列 → 上下堆叠（不依赖 useIsMobile / antd Col）
+  .columns {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .column {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+
   .list-outer {
     border-radius: 8px;
   }
@@ -180,7 +208,6 @@
   }
 
   .list-scroll {
-    // 移动端改视口/原生滚动，限制高度避免双列叠放后过高
     max-height: min(var(--max-scroller-height, 800px), 50vh);
     overflow: auto;
     -webkit-overflow-scrolling: touch;
@@ -202,7 +229,6 @@
     &.is-drag {
       :global {
         .sortable-drag-handle {
-          // 扩大触控拖拽热区
           padding: 14px 6px;
         }
       }
