@@ -13,8 +13,8 @@
 | getSearchProps     | Function | -   | 获取搜索属性的函数，用于配置搜索功能                                                    |
 | searchPlaceholder  | String   | -   | 搜索框占位文本，未设置时使用国际化文本                                                   |
 | selectedTitle      | String   | -   | 自定义已选列表的标题，未设置时使用国际化文本                                                |
-| listTitle          | String   | -   | 自定义可选列表的标题，未设置时使用国际化文本                                                |
-| renderListTitle    | Function | -   | 自定义渲染列表标题的函数，参数为包含fetchApi、searchProps、setSearchProps的对象              |
+| listTitle          | ReactNode | -   | 自定义可选列表标题区域，可直接传入 Filter 等组件；传入后不再显示默认「列表」文案 |
+| renderListTitle    | Function | -   | 自定义渲染列表标题；参数含 fetchApi、defaultTitle、searchProps、setSearchProps；可不渲染 defaultTitle |
 | maxScrollerHeight  | Number   | 800 | 设置滚动区域的最大高度（单位：像素）                                                    |
 | showClearButton    | Boolean  | true | 是否显示清空按钮，默认显示                                                       |
 
