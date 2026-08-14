@@ -45,10 +45,24 @@ EntrySelector 适用于需要从预定义列表中选择多个条目并进行排
 #### 示例样式
 
 ```scss
+@use '~@kne/responsive-utils/scss' as resp;
+
 .ant-card {
   border-color: black;
   text-align: center;
   width: 200px;
+}
+
+// 手机预览下给示例内容留白，便于观察层级与间距
+@include resp.mobile-container {
+  .example-driver-runner {
+    padding: 12px 16px 24px;
+    box-sizing: border-box;
+  }
+
+  .ant-card {
+    width: 100%;
+  }
 }
 ```
 
