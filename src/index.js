@@ -290,7 +290,7 @@ const EntrySelector = createWithIntlProvider({
                             e.stopPropagation();
                           }}
                         >
-                          <ButtonGroup more={<Button type="link" icon={<MoreOutlined />} />} list={targetOptions} />
+                          <ButtonGroup showLength={0} more={<Button type="link" icon={<MoreOutlined />} />} list={targetOptions} />
                         </Flex>
                       )}
                     </List.Item>
