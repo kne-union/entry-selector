@@ -14,7 +14,7 @@ npm i --save @kne/entry-selector
 
 EntrySelector 是一个用于选择和管理条目列表的 React 组件。它提供了一个直观的界面，允许用户从可选列表中选择条目，并对已选条目进行管理，包括排序、搜索和删除等操作。
 
-### 主要功能
+#### 主要功能
 
 - **双列表展示**：清晰地分离已选条目和可选条目
 - **拖拽排序**：支持对已选条目进行拖拽排序
@@ -23,7 +23,7 @@ EntrySelector 是一个用于选择和管理条目列表的 React 组件。它�
 - **国际化支持**：内置中文和英文语言支持
 - **添加新条目**：支持添加不在预设列表中的新条目
 
-### 使用场景
+#### 使用场景
 
 EntrySelector 适用于需要从预定义列表中选择多个条目并进行排序的场景，例如：
 
@@ -32,7 +32,7 @@ EntrySelector 适用于需要从预定义列表中选择多个条目并进行排
 - 配置用户权限
 - 选择并排序展示项目
 
-### 基本原理
+#### 基本原理
 
 组件内部维护已选条目列表和可选条目列表两个状态，通过用户交互在这两个列表之间移动条目。组件使用 react-sortablejs
 实现拖拽排序功能，并支持通过搜索框过滤条目列表。
@@ -43,10 +43,24 @@ EntrySelector 适用于需要从预定义列表中选择多个条目并进行排
 #### 示例样式
 
 ```scss
+@use '~@kne/responsive-utils/scss' as resp;
+
 .ant-card {
   border-color: black;
   text-align: center;
   width: 200px;
+}
+
+// 手机预览下给示例内容留白，便于观察层级与间距
+@include resp.mobile-container {
+  .example-driver-runner {
+    padding: 12px 16px 24px;
+    box-sizing: border-box;
+  }
+
+  .ant-card {
+    width: 100%;
+  }
 }
 ```
 
@@ -460,7 +474,7 @@ render(<FullFeaturesExample />);
 
 ### API
 
-### 组件属性
+#### 组件属性
 
 | 属性名                | 类型       | 默认值 | 说明                                                                    |
 |--------------------|----------|-----|-----------------------------------------------------------------------|
@@ -480,7 +494,7 @@ render(<FullFeaturesExample />);
 | maxScrollerHeight  | Number   | 800 | 设置滚动区域的最大高度（单位：像素）                                                    |
 | showClearButton    | Boolean  | true | 是否显示清空按钮，默认显示                                                       |
 
-### 国际化支持
+#### 国际化支持
 
 组件内置中文和英文两种语言，默认使用中文。可通过createWithIntlProvider配置国际化。
 
@@ -489,7 +503,7 @@ render(<FullFeaturesExample />);
 | 中文 | zh-CN |
 | 英文 | en-US |
 
-### 国际化文本键值
+#### 国际化文本键值
 
 | 键名                | 中文     | 英文                   |
 |-------------------|--------|----------------------|

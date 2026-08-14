@@ -1,3 +1,5 @@
+@use '~@kne/responsive-utils/scss' as resp;
+
 .entry-selector {
   background: #f6f7f9;
   border-radius: 12px;
@@ -155,4 +157,55 @@
 .sortable-ghost {
   background: var(--primary-color-1);
   border: 1px dashed var(--primary-color) !important;
+}
+
+@include resp.mobile-container {
+  .entry-selector {
+    padding: 12px;
+    border-radius: 8px;
+  }
+
+  .list-outer {
+    border-radius: 8px;
+  }
+
+  .list-header {
+    padding: 10px 12px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .list-header-search {
+    width: 100%;
+  }
+
+  .list-scroll {
+    // 移动端改视口/原生滚动，限制高度避免双列叠放后过高
+    max-height: min(var(--max-scroller-height, 800px), 50vh);
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .list {
+    min-height: 120px;
+  }
+
+  .list-item-content {
+    :global(.list-item-remove-btn) {
+      opacity: 1;
+    }
+  }
+
+  .columns-control-content-item {
+    padding: 10px 12px !important;
+
+    &.is-drag {
+      :global {
+        .sortable-drag-handle {
+          // 扩大触控拖拽热区
+          padding: 14px 6px;
+        }
+      }
+    }
+  }
 }

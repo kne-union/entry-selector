@@ -7,6 +7,7 @@ import { MoreOutlined, HolderOutlined, DeleteOutlined, ClearOutlined } from '@an
 import ButtonGroup, { ConfirmButton } from '@kne/button-group';
 import useControllerValue from '@kne/use-control-value';
 import { FetchScrollLoader } from '@kne/scroll-loader';
+import { useIsMobile } from '@kne/responsive-utils';
 import classnames from 'classnames';
 import SearchInput from '@kne/search-input';
 import { Flex, Button, Row, Col, List, Empty, Checkbox } from 'antd';
@@ -26,8 +27,10 @@ const EntrySelector = createWithIntlProvider({
   const [value, onChange] = useControllerValue(props);
   const [searchProps, setSearchProps] = useState({});
   const { formatMessage } = useIntl();
+  const isMobile = useIsMobile();
   const ref = useRef(null);
   const selectedMappingRef = useRef(new Map());
+  const colSpan = isMobile ? 24 : 12;
   const onSelected = item => {
     return onChange(value => {
       const newValue = (value || []).slice(0);
@@ -45,7 +48,7 @@ const EntrySelector = createWithIntlProvider({
   return (
     <Flex
       vertical
-      gap={8}
+      gap={isMobile ? 12 : 8}
       className={classnames(className, style['entry-selector'])}
       style={{
         '--max-scroller-height': `${maxScrollerHeight}px`
@@ -74,6 +77,7 @@ const EntrySelector = createWithIntlProvider({
         ref={ref}
         className={style['list-scroll']}
         autoHide={false}
+        useSimpleBar={!isMobile}
         render={({ fetchApi, children }) => {
           const { data } = fetchApi;
           const { pageData, totalCount } = Object.assign(
@@ -89,9 +93,87 @@ const EntrySelector = createWithIntlProvider({
           });
           const listMapping = selectedMappingRef.current;
           const currentList = (value || []).map(item => Object.assign({}, listMapping.get(item.id) || item));
+          const selectedListBody =
+            value && value.length > 0 ? (
+              <List className={style['list']} size="small">
+                <ReactSortable
+                  filter=".sortable-ignore-elements"
+                  handle=".sortable-drag-handle"
+                  dragClass={style['sortable-drag']}
+                  ghostClass={style['sortable-ghost']}
+                  forceFallback
+                  animation={300}
+                  delayOnTouchStart
+                  delay={2}
+                  list={currentList}
+                  setList={list => {
+                    onChange(value => {
+                      const mapping = new Map((value || []).map(item => [item.id, item]));
+                      return list.map(({ id }) => {
+                        return mapping.get(id);
+                      });
+                    });
+                  }}
+                >
+                  {currentList.map((item, index) => {
+                    const defaultItem = <span className={'list-item-title'}>{item.title}</span>;
+                    const removeOption = (
+                      <ConfirmButton
+                        color="danger"
+                        variant="filled"
+                        className={'list-item-remove-btn'}
+                        icon={<DeleteOutlined />}
+                        onClick={() => {
+                          onSelected(item);
+                        }}
+                      />
+                    );
+                    const mapping = new Map((value || []).map(item => [item.id, item]));
+                    return (
+                      <List.Item key={item.id} className={classnames(style['columns-control-content-item'], style['is-drag'])}>
+                        <HolderOutlined className={classnames('sortable-drag-handle', style['columns-control-content-item-icon'])} />
+                        <div className={style['list-index']}>{index + 1}</div>
+                        <Flex justify="space-between" gap={8} flex={1} className={style['list-item-content']}>
+                          <Flex vertical flex={1}>
+                            {typeof renderSelectedItem === 'function'
+                              ? renderSelectedItem(mapping.get(item.id), {
+                                  el: defaultItem,
+                                  removeOptionEl: removeOption,
+                                  target: item,
+                                  fetchApi,
+                                  searchProps,
+                                  setSearchProps,
+                                  onChange,
+                                  onSelected,
+                                  onReplace: targetItem => {
+                                    return onChange(value => {
+                                      const newValue = (value || []).slice(0);
+                                      const index = newValue.findIndex(({ id }) => id === item.id);
+                                      const currentItem = newValue[index];
+                                      if (index > -1) {
+                                        newValue.splice(index, 1, Object.assign({}, typeof targetItem === 'function' ? targetItem(currentItem) : targetItem));
+                                      }
+                                      return newValue;
+                                    });
+                                  }
+                                })
+                              : defaultItem}
+                          </Flex>
+                          {removeOption}
+                        </Flex>
+                      </List.Item>
+                    );
+                  })}
+                </ReactSortable>
+              </List>
+            ) : (
+              <Flex className={style['list']} justify="center" align="center">
+                <Empty />
+              </Flex>
+            );
           return (
-            <Row gutter={[12, 12]}>
-              <Col span={12}>
+            <Row gutter={isMobile ? [0, 12] : [12, 12]}>
+              <Col span={colSpan}>
                 <div className={style['list-outer']}>
                   {totalCount > 0 && (
                     <Flex className={style['list-header']} justify="space-between" align="center">
@@ -109,96 +191,25 @@ const EntrySelector = createWithIntlProvider({
                       )}
                     </Flex>
                   )}
-                  <SimpleBar className={style['list-scroll']} autoHide={false}>
-                    {value && value.length > 0 ? (
-                      <List className={style['list']} size="small">
-                        <ReactSortable
-                          filter=".sortable-ignore-elements"
-                          handle=".sortable-drag-handle"
-                          dragClass={style['sortable-drag']}
-                          ghostClass={style['sortable-ghost']}
-                          forceFallback
-                          animation={300}
-                          delayOnTouchStart
-                          delay={2}
-                          list={currentList}
-                          setList={list => {
-                            onChange(value => {
-                              const mapping = new Map((value || []).map(item => [item.id, item]));
-                              return list.map(({ id }) => {
-                                return mapping.get(id);
-                              });
-                            });
-                          }}
-                        >
-                          {currentList.map((item, index) => {
-                            const defaultItem = <span className={'list-item-title'}>{item.title}</span>;
-                            const removeOption = (
-                              <ConfirmButton
-                                color="danger"
-                                variant="filled"
-                                className={'list-item-remove-btn'}
-                                icon={<DeleteOutlined />}
-                                onClick={() => {
-                                  onSelected(item);
-                                }}
-                              />
-                            );
-                            const mapping = new Map((value || []).map(item => [item.id, item]));
-                            return (
-                              <List.Item key={item.id} className={classnames(style['columns-control-content-item'], style['is-drag'])}>
-                                <HolderOutlined className={classnames('sortable-drag-handle', style['columns-control-content-item-icon'])} />
-                                <div className={style['list-index']}>{index + 1}</div>
-                                <Flex justify="space-between" gap={8} flex={1} className={style['list-item-content']}>
-                                  <Flex vertical flex={1}>
-                                    {typeof renderSelectedItem === 'function'
-                                      ? renderSelectedItem(mapping.get(item.id), {
-                                          el: defaultItem,
-                                          removeOptionEl: removeOption,
-                                          target: item,
-                                          fetchApi,
-                                          searchProps,
-                                          setSearchProps,
-                                          onChange,
-                                          onSelected,
-                                          onReplace: targetItem => {
-                                            return onChange(value => {
-                                              const newValue = (value || []).slice(0);
-                                              const index = newValue.findIndex(({ id }) => id === item.id);
-                                              const currentItem = newValue[index];
-                                              if (index > -1) {
-                                                newValue.splice(index, 1, Object.assign({}, typeof targetItem === 'function' ? targetItem(currentItem) : targetItem));
-                                              }
-                                              return newValue;
-                                            });
-                                          }
-                                        })
-                                      : defaultItem}
-                                  </Flex>
-                                  {removeOption}
-                                </Flex>
-                              </List.Item>
-                            );
-                          })}
-                        </ReactSortable>
-                      </List>
-                    ) : (
-                      <Flex className={style['list']} justify="center" align="center">
-                        <Empty />
-                      </Flex>
-                    )}
-                  </SimpleBar>
+                  {isMobile ? (
+                    <div className={style['list-scroll']}>{selectedListBody}</div>
+                  ) : (
+                    <SimpleBar className={style['list-scroll']} autoHide={false}>
+                      {selectedListBody}
+                    </SimpleBar>
+                  )}
                 </div>
               </Col>
-              <Col span={12}>
+              <Col span={colSpan}>
                 <div className={style['list-outer']}>
                   <Flex
                     className={classnames(style['list-header'], {
                       [style['list-header-plain']]: listTitle != null
                     })}
+                    vertical={isMobile}
                     justify="space-between"
                     gap={8}
-                    align="center"
+                    align={isMobile ? 'stretch' : 'center'}
                   >
                     <div className={style['list-header-content']}>
                       {(() => {
