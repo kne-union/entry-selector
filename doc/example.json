@@ -61,6 +61,25 @@
           "packageName": "@kne/remote-loader"
         }
       ]
+    },
+    {
+      "title": "滚动区高度（关联题库复现）",
+      "description": "双列白卡统一高度（height / --entry-selector-height）。右侧 listTitle 展开后两侧仍同高铺满，滚动区吃剩余高度",
+      "code": "./scroller-height.js",
+      "scope": [
+        {
+          "name": "_EntrySelector",
+          "packageName": "@kne/current-lib_entry-selector",
+          "importStatement": "import * as _EntrySelector from \"@kne/entry-selector\""
+        },
+        {
+          "packageName": "@kne/current-lib_entry-selector/dist/index.css"
+        },
+        {
+          "name": "antd",
+          "packageName": "antd"
+        }
+      ]
     }
   ]
 }
