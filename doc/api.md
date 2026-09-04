@@ -18,6 +18,9 @@
 | height             | Number   | 800 | 双列白色卡片统一高度（px）；写入 `--entry-selector-height`。title 增高时滚动区变矮，两侧始终同高铺满 |
 | maxScrollerHeight  | Number   | -   | 兼容旧名，等同 `height`；优先使用 `height` |
 | showClearButton    | Boolean  | true | 是否显示清空按钮，默认显示                                                       |
+| showSelected       | Boolean  | true | 是否显示已选列；`false` 时只渲染可选列表（如外层自建已选区） |
+| showList           | Boolean  | true | 是否显示可选列表列；`false` 时只渲染已选列 |
+| columnsOrder       | String   | selected-first | 列顺序：`selected-first`（已选在左）或 `list-first`（列表在左） |
 
 也可在外层通过 CSS 变量设置（未传 `height` / `maxScrollerHeight` 时生效）：
 
