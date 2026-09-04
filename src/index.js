@@ -70,13 +70,36 @@ const EntrySelector = createWithIntlProvider({
     'en-US': enUS
   },
   namespace: 'entry-selector'
-})(({ className, onAdd, api, options, selectedTitle, listTitle, renderListTitle, renderSelectedItem, renderItem, renderOptions, getSearchProps, searchPlaceholder, height, maxScrollerHeight, showClearButton = true, ...props }) => {
+})(({
+  className,
+  onAdd,
+  api,
+  options,
+  selectedTitle,
+  listTitle,
+  renderListTitle,
+  renderSelectedItem,
+  renderItem,
+  renderOptions,
+  getSearchProps,
+  searchPlaceholder,
+  height,
+  maxScrollerHeight,
+  showClearButton = true,
+  showSelected = true,
+  showList = true,
+  columnsOrder = 'selected-first',
+  ...props
+}) => {
   const [value, onChange] = useControllerValue(props);
   const [searchProps, setSearchProps] = useState({});
   const { formatMessage } = useIntl();
   const isMobile = useIsMobile();
   const ref = useRef(null);
   const selectedMappingRef = useRef(new Map());
+  const shouldShowSelected = showSelected !== false;
+  const shouldShowList = showList !== false;
+  const listFirst = columnsOrder === 'list-first';
   // 双列白卡统一高度：优先 height，兼容旧 maxScrollerHeight；未传则走 CSS 变量 / 默认值
   const containerHeight = height ?? maxScrollerHeight;
   const onSelected = item => {
@@ -225,23 +248,22 @@ const EntrySelector = createWithIntlProvider({
                   <Empty />
                 </Flex>
               );
-            const selectedHeader =
-              totalCount > 0 ? (
-                <Flex className={style['list-header']} justify="space-between" align="center">
-                  <div className={style['list-header-title']}>{selectedTitle || formatMessage({ id: 'selected' })}</div>
-                  {showClearButton && value && value.length > 0 && (
-                    <Button
-                      type="link"
-                      size="small"
-                      title={formatMessage({ id: 'clear' })}
-                      icon={<ClearOutlined />}
-                      onClick={() => {
-                        onChange([]);
-                      }}
-                    />
-                  )}
-                </Flex>
-              ) : null;
+            const selectedHeader = (shouldShowList ? totalCount > 0 : true) ? (
+              <Flex className={style['list-header']} justify="space-between" align="center">
+                <div className={style['list-header-title']}>{selectedTitle || formatMessage({ id: 'selected' })}</div>
+                {showClearButton && value && value.length > 0 && (
+                  <Button
+                    type="link"
+                    size="small"
+                    title={formatMessage({ id: 'clear' })}
+                    icon={<ClearOutlined />}
+                    onClick={() => {
+                      onChange([]);
+                    }}
+                  />
+                )}
+              </Flex>
+            ) : null;
             const listHeader = (
               <Flex
                 className={classnames(style['list-header'], {
@@ -282,24 +304,39 @@ const EntrySelector = createWithIntlProvider({
                 )}
               </Flex>
             );
+            const selectedColumn = shouldShowSelected ? (
+              <div className={style['column']} key="selected">
+                <FillHeightScroll measure={!isMobile} header={selectedHeader}>
+                  {isMobile ? (
+                    selectedListBody
+                  ) : (
+                    <SimpleBar className={style['list-scroll-inner']} style={{ height: '100%' }} autoHide={false}>
+                      {selectedListBody}
+                    </SimpleBar>
+                  )}
+                </FillHeightScroll>
+              </div>
+            ) : null;
+            const listColumn = shouldShowList ? (
+              <div className={style['column']} key="list">
+                <FillHeightScroll measure={!isMobile} header={listHeader}>
+                  {children}
+                </FillHeightScroll>
+              </div>
+            ) : null;
             return (
               <div className={style['columns']}>
-                <div className={style['column']}>
-                  <FillHeightScroll measure={!isMobile} header={selectedHeader}>
-                    {isMobile ? (
-                      selectedListBody
-                    ) : (
-                      <SimpleBar className={style['list-scroll-inner']} style={{ height: '100%' }} autoHide={false}>
-                        {selectedListBody}
-                      </SimpleBar>
-                    )}
-                  </FillHeightScroll>
-                </div>
-                <div className={style['column']}>
-                  <FillHeightScroll measure={!isMobile} header={listHeader}>
-                    {children}
-                  </FillHeightScroll>
-                </div>
+                {listFirst ? (
+                  <>
+                    {listColumn}
+                    {selectedColumn}
+                  </>
+                ) : (
+                  <>
+                    {selectedColumn}
+                    {listColumn}
+                  </>
+                )}
               </div>
             );
           }}
