@@ -15,8 +15,17 @@
 | selectedTitle      | String   | -   | 自定义已选列表的标题，未设置时使用国际化文本                                                |
 | listTitle          | ReactNode | -   | 自定义可选列表标题区域，可直接传入 Filter 等组件；传入后不再显示默认「列表」文案 |
 | renderListTitle    | Function | -   | 自定义渲染列表标题；参数含 fetchApi、defaultTitle、searchProps、setSearchProps；可不渲染 defaultTitle |
-| maxScrollerHeight  | Number   | 800 | 设置滚动区域的最大高度（单位：像素）                                                    |
+| height             | Number   | 800 | 双列白色卡片统一高度（px）；写入 `--entry-selector-height`。title 增高时滚动区变矮，两侧始终同高铺满 |
+| maxScrollerHeight  | Number   | -   | 兼容旧名，等同 `height`；优先使用 `height` |
 | showClearButton    | Boolean  | true | 是否显示清空按钮，默认显示                                                       |
+
+也可在外层通过 CSS 变量设置（未传 `height` / `maxScrollerHeight` 时生效）：
+
+```css
+.my-wrap {
+  --entry-selector-height: 500px;
+}
+```
 
 ### 国际化支持
 

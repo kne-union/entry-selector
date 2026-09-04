@@ -16,18 +16,33 @@
   display: flex;
   gap: 12px;
   align-items: stretch;
+  // 双列统一高度：props height / maxScrollerHeight 或外部 --entry-selector-height
+  height: var(--entry-selector-height, 800px);
 }
 
 .column {
   flex: 1 1 0;
   min-width: 0;
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .list-outer {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
   background: #ffffff;
   border-radius: 12px;
-  height: 100%;
   overflow: hidden;
+}
+
+.list-header-slot {
+  flex: none;
+  min-width: 0;
 }
 
 .list-header-search {
@@ -35,6 +50,7 @@
 }
 
 .list-header {
+  flex: none;
   padding: 8px 16px;
   border-bottom: 1px solid var(--bg-color-grey-3);
   font-weight: 600;
@@ -59,12 +75,19 @@
   text-overflow: ellipsis;
 }
 
+// 剩余高度宿主：由 FillHeightScroll 写入明确 px；内部 SimpleBar height:100%
 .list-scroll {
-  max-height: var(--max-scroller-height, 800px);
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.list-scroll-inner {
+  height: 100%;
+  max-height: 100%;
 }
 
 .list {
-  height: 100%;
   background: #ffffff;
   min-height: 150px;
 
@@ -186,15 +209,18 @@
   .columns {
     flex-direction: column;
     gap: 12px;
+    height: auto;
   }
 
   .column {
     flex: 1 1 auto;
     width: 100%;
+    height: auto;
   }
 
   .list-outer {
     border-radius: 8px;
+    height: auto;
   }
 
   .list-header {
@@ -208,9 +234,15 @@
   }
 
   .list-scroll {
-    max-height: min(var(--max-scroller-height, 800px), 50vh);
+    flex: none;
+    height: min(var(--entry-selector-height, 800px), 50vh);
     overflow: auto;
     -webkit-overflow-scrolling: touch;
+  }
+
+  .list-scroll-inner {
+    height: auto;
+    max-height: none;
   }
 
   .list {
